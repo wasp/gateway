@@ -1,0 +1,10 @@
+# Python
+.eggs/
+*.egg-info
+__pycache__/
+*.py[co]
+.tox/
+
+# Editors
+.idea/
+*.iml
