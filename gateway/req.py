@@ -1,12 +1,13 @@
 import asyncio
-from typing import Dict, Tuple, List
+from typing import List, Tuple
 
 
 class Request:
     __slots__ = ('_method', '_version', '_headers', '_content', '_url',
                  '_transport', '_loop')
 
-    def __init__(self, method, version, headers, content, url, transport, loop):
+    def __init__(self, method, version, headers, content, url, transport,
+                 loop):
         """
         Model of an HTTP Request, likely unbuffered.
 
@@ -31,7 +32,7 @@ class Request:
         return self._method
 
     @property
-    def version(self) -> bytes:
+    def version(self) -> str:
         return self._version
 
     @property

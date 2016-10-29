@@ -120,7 +120,8 @@ class GatewayProtocol(asyncio.Protocol):
         print('Error: request duration timeout.')
         self.transport.close()
 
-    def handle_task_complete(self, task: asyncio.Task, request: Request) -> None:
+    def handle_task_complete(self, task: asyncio.Task,
+                             request: Request) -> None:
         """
         Handle the cleanup after a handler/dispatcher completed
         its job.
@@ -142,8 +143,8 @@ class GatewayProtocol(asyncio.Protocol):
 
     def handle_task_ok(self, task: asyncio.Task, request: Request) -> None:
         """
-        Handle the successful execution of a handler task, effectively this writes
-        and closes the transport.
+        Handle the successful execution of a handler task, effectively this
+        writes and closes the transport.
 
         :param task: Completed task, task.exception() is None
         :param request: Original request
@@ -160,8 +161,8 @@ class GatewayProtocol(asyncio.Protocol):
 
     def handle_task_error(self, task: asyncio.Task, request: Request) -> None:
         """
-        Handle the non-successful execution of a handler task, effectively this writes
-        and closes the transport.
+        Handle the non-successful execution of a handler task, effectively
+        this writes and closes the transport.
 
         :param task: Completed task, task.exception() is not None
         :param request: Original request
@@ -190,18 +191,3 @@ class GatewayProtocol(asyncio.Protocol):
             len(message),
             message.encode()
         ))
-
-
-class Response:
-    def __init__(self, status: HTTPStatus, writer):
-        self.status = status
-        self.writer = writer
-
-        self.writer.write(b'HTTP/1.1 %d %b\r\n' % (
-            status.value, status.phrase.encode()
-        ))
-
-    def add_header(self, name, value):
-        self.writer.write(b'%b: %b\r\n' % (name, value))
-
-    # def

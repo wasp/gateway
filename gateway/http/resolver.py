@@ -60,19 +60,21 @@ class DictResolver(dict, AbstractServiceResolver):
         url = request.url
         match = URL_REGEX.search(url)
         if not match:
-            # TODO: Should use non-http specific errors since this is literally just a resolver
+            # TODO: Should use non-http specific errors
             raise HTTPNotFoundException('URL does not contain service route.')
 
         service, path, query = match.groups()
         if service not in self:
-            raise HTTPBadGatewayException('Unable to satisfy routes for service: ' + service)
+            raise HTTPBadGatewayException('Unable to satisfy routes for '
+                                          'service: ' + service)
 
         return _build_url(path, query, self[service])
 
 
 # TODO: Externalize
 class EurekaResolver(AbstractServiceResolver):
-    def __init__(self, *, loop=None, eureka_url='http://localhost:8761/eureka/'):
+    def __init__(self, *, loop=None,
+                 eureka_url='http://localhost:8761/eureka/'):
         self._eureka_url = eureka_url
         self._loop = loop or asyncio.get_event_loop()
         self._session = aiohttp.ClientSession(headers={

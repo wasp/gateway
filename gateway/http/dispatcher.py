@@ -46,16 +46,18 @@ class HttpDispatcher(AbstractDispatcher):
             data = request.content
 
         try:
-            async with self._session.request(request.method.decode(), service_addr,
+            async with self._session.request(request.method.decode(),
+                                             service_addr,
                                              data=data,
                                              headers=headers) as resp:
                 # TODO: Need to support any other versions?
                 # TODO: Abstract to response class.
-                request.transport.write(b'HTTP/1.1 %d %b\r\n' % (resp.status, resp.reason.encode()))
-                # TODO: Figure out a way to use raw_headers to avoid the decode/encode.
-                #       right now they appear to be all caps - which I am not sure is OK
+                request.transport.write(b'HTTP/1.1 %d %b\r\n' % (resp.status,
+                                                                 resp.reason.encode()))  # noqa
+                # TODO: Figure out how to use raw_headers to bypass en/decode
                 for k, v in resp.headers.items():
-                    request.transport.write(b'%b: %b\r\n' % (k.encode(), v.encode()))
+                    request.transport.write(b'%b: %b\r\n' % (k.encode(),
+                                                             v.encode()))
                 request.transport.write(b'\r\n')
 
                 while True:
@@ -66,4 +68,5 @@ class HttpDispatcher(AbstractDispatcher):
 
                 request.transport.close()
         except ClientOSError:
-            raise HTTPBadGatewayException('Unable to reach destination, service unreachable.')
+            raise HTTPBadGatewayException('Unable to reach destination, '
+                                          'service unreachable.')

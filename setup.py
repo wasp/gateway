@@ -10,8 +10,9 @@ setup(name='wasp-gateway',
       author='Matt Rasband, Nick Humrich',
       author_email='matt.rasband@gmail.com',
       license='Apache-2.0',
-      url='',
-      download_url='',
+      url='https://github.com/wickedasp/gateway',
+      download_url=('https://github.com/wickedasp/gateway'
+                    '/releases/v' + __version__ + '.tar.bz2'),
       keywords=(
           'microservice',
           'gateway',
