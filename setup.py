@@ -6,13 +6,13 @@ setup(name='wasp-gateway',
       description=('API Gateway: Central access point to a microservice based'
                    ' platform. Translates all communication from REST to '
                    'the backend speak. Adapters provided for HTTP Proxying '
-                   'and rabbitmq BUSes'),
+                   'and AMQP-like BUSes'),
       author='Matt Rasband, Nick Humrich',
       author_email='matt.rasband@gmail.com',
       license='Apache-2.0',
       url='https://github.com/wickedasp/gateway',
       download_url=('https://github.com/wickedasp/gateway'
-                    '/releases/v' + __version__ + '.tar.bz2'),
+                    '/releases/v' + __version__ + '.tar.gz'),
       keywords=(
           'microservice',
           'gateway',
@@ -22,6 +22,8 @@ setup(name='wasp-gateway',
       packages=find_packages(),
       classifiers=[
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3 :: Only',
           'License :: OSI Approved :: Apache Software License',
           'Intended Audience :: Developers',
           'Development Status :: 2 - Pre-Alpha',

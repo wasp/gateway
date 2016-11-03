@@ -2,11 +2,6 @@ import abc
 import re
 from typing import Optional
 
-import asyncio
-
-import atexit
-
-import aiohttp
 from gateway.exc import HTTPNotFoundException, HTTPBadGatewayException
 from gateway.req import Request
 
@@ -69,39 +64,3 @@ class DictResolver(dict, AbstractServiceResolver):
                                           'service: ' + service)
 
         return _build_url(path, query, self[service])
-
-
-# TODO: Externalize
-class EurekaResolver(AbstractServiceResolver):
-    def __init__(self, *, loop=None,
-                 eureka_url='http://localhost:8761/eureka/'):
-        self._eureka_url = eureka_url
-        self._loop = loop or asyncio.get_event_loop()
-        self._session = aiohttp.ClientSession(headers={
-            'Accept': 'application/json'
-        }, loop=self._loop)
-
-        self._loop.create_task(self._cache_scheduler())
-
-    @atexit.register
-    def close(self):
-        if not self._session.closed:
-            self._session.close()
-
-    async def resolve(self, request: Request) -> str:
-        pass
-
-    async def refresh_cache(self):
-        url = self._eureka_url + '/apps/'
-        with aiohttp.Timeout(10, loop=self._loop):
-            async with self._session.get(url) as resp:
-                assert resp.status == 200, resp
-                js = await resp.json()
-                print('apps:', js)
-
-    async def _cache_scheduler(self):
-        """Run the cache updater on a schedule, this will
-        trigger an update every 31s, not do 31s per """
-        while True:
-            await asyncio.sleep(31, loop=self._loop)
-            self._loop.create_task(self.refresh_cache())

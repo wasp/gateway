@@ -1,7 +1,8 @@
 import asyncio
 import functools
+from asyncio import Task  # noqa
 from http import HTTPStatus
-from typing import Optional
+from typing import List, Optional, Tuple  # noqa
 
 import httptools
 
@@ -11,44 +12,42 @@ from .req import Request
 
 
 class GatewayProtocol(asyncio.Protocol):
-    __slots__ = ('dispatcher', 'loop', 'parser', 'transport', 'connections',
+    __slots__ = ('dispatcher', 'loop', 'parser', 'transport',
                  'request_timeout', 'reader', 'url', 'headers')
 
-    """
-    This is a specialized HTTP protocol meant to be a low-latency API Gateway.
-    For the HTTP dispatcher this means that data in/out will be streamed each
-    direction, other dispatchers may require full request/response bodies be
-    read into memory.
-
-    :param loop: event loop
-    :param dispatcher: dispatcher strategy
-    :param request_timeout: Max length of a request cycle in secs (def: 15s)
-    """
     def __init__(self, loop: asyncio.BaseEventLoop,
                  dispatcher: AbstractDispatcher, *, request_timeout: int=15):
-        assert isinstance(dispatcher, AbstractDispatcher), dispatcher
+        """
+        This is a specialized HTTP protocol meant to be a low-latency
+        API Gateway. For the HTTP dispatcher this means that data
+        in/out will be streamed each direction, other dispatchers may
+        require full request/response bodies be read into memory.
 
+        :param loop: event loop
+        :param dispatcher: dispatcher strategy, should implement the
+                           methods defined in the AbstractDispatcher
+        :param request_timeout: Max length of a request cycle in secs
+                                (def: 15s)
+        """
         self.dispatcher = dispatcher
         self.loop = loop
-
-        self.parser = None
-        self.transport = None
-        self.connections = set()
         self.request_timeout = request_timeout
 
-        self.reader = None  # request content reader
-        self.timeout = None  # call length limit
+        self.parser = None  # httptools.HttpRequestParser
+        self.transport = None  # type: Optional[asyncio.Transport]
+
+        self.reader = None  # type: Optional[asyncio.StreamReader]
+        self.timeout = None  # type: Optional[Task]
 
         # request info
-        self.url = None
-        self.headers = None
+        self.url = None  # type: Optional[str]
+        self.headers = None  # type: Optional[List[Tuple[bytes, bytes]]]
 
     # ===========================
     # asyncio.Protocol callbacks
     # ===========================
     def connection_made(self, transport: asyncio.Transport) -> None:
         self.transport = transport
-        self.connections.add(self)
         self.parser = httptools.HttpRequestParser(self)
         self.reader = asyncio.StreamReader(loop=self.loop)
 
@@ -56,7 +55,6 @@ class GatewayProtocol(asyncio.Protocol):
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         self.cancel_timeout()
-        self.connections.remove(self)
 
     def data_received(self, data: bytes) -> None:
         try:
